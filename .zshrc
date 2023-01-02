@@ -1,0 +1,297 @@
+#############################
+# File:       zshrc.common
+# Author:     Zack Fleischman
+#############################
+
+######
+# Path
+######
+
+# Recursively get all the directories in the scripts folder
+SCRIPT_PATHS=$(find ~/repos/scripts/ -type d | grep -v "\.git" | sed "s,/$,," | tr '\n' ':')
+
+# PATH and PYTHONPATH
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/scripts:$SCRIPT_PATHS:/usr/texbin"
+export PYTHONPATH="$PYTHONPATH:$HOME/repos/scripts/python"
+
+# Environment Variables
+export BROWSER="/Applications/Google\ Chrome.app"
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+##################
+# OpenSSL Shit
+##################
+# If you need to have openssl@1.1 first in your PATH, run:
+export PATH="/usr/local/opt/openssl@1.1/bin:$PATH" 
+
+#For compilers to find openssl@1.1 you may need to set:
+export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
+export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
+
+#For pkg-config to find openssl@1.1 you may need to set:
+export PKG_CONFIG_PATH="/usr/local/opt/openssl@1.1/lib/pkgconfig"
+
+
+####################
+# oh-my-zsh Settings
+####################
+# Path to `oh-my-zsh` installation.
+export ZSH=$HOME/.oh-my-zsh
+
+# Theme name. (Stored in `~/.oh-my-zsh/themes`)
+ZSH_THEME=burner
+
+# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
+
+########## Fix slowness of pastes with zsh-syntax-highlighting.zsh
+pasteinit() {
+  OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
+  zle -N self-insert url-quote-magic # I wonder if you'd need `.url-quote-magic`?
+}
+
+pastefinish() {
+  zle -N self-insert $OLD_SELF_INSERT
+}
+zstyle :bracketed-paste-magic paste-init pasteinit
+zstyle :bracketed-paste-magic paste-finish pastefinish
+source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+########## Fix slowness of pastes
+
+
+# Source External Scripts
+source $ZSH/oh-my-zsh.sh
+source ~/.tmuxinator.zsh
+
+autoload run-help
+HELPDIR=/usr/local/share/zsh/help
+
+# zsh options
+setopt no_histverify
+
+
+###############
+# Misc Settings
+###############
+
+# Editor
+export EDITOR=vim
+alias e='vim'
+alias vi='vim'
+
+# virtualenvwrapper
+# export WORKON_HOME=~/.virtualenvs
+# source /usr/local/bin/virtualenvwrapper.sh
+
+# Tmux window naming
+DISABLE_AUTO_TITLE=true
+
+# Get rid of python's pyc files
+export PYTHONDONTWRITEBYTECODE=1
+alias setpyc='export PYTHONDONTWRITEBYTECODE=0'
+alias unsetpyc='export PYTHONDONTWRITEBYTECODE=1'
+
+
+#################
+# Command aliases
+#################
+
+# Open config files
+alias sz='source ~/.zshrc'
+alias ez='vim ~/.zshrc.common'
+alias ezz='vim ~/.zshrc'
+alias eg='vim ~/.gitconfig'
+alias ev='vim ~/.vimrc'
+alias ep='vim ~/.vimplugins'
+
+# Check Resource Hogs
+alias mem='top -o mem'
+alias cpu='top -o cpu'
+
+# Start up tmuxinator
+alias z='mux start' 
+
+# Python
+alias py='ipython -i ~/repos/scripts/zpython/zutil.py' # Start ipython with my utility script
+alias zutil='vim ~/repos/scripts/zpython/zutil.py' # Modify my python utility script
+alias pudb='python -m pudb.run' # Python Debugger
+alias pyc='find . -name "*.pyc" -type f -delete' # Delete pyc files in directory (recursively)
+alias pydocs='pydoc -p 9999'
+
+# Heroku
+alias h='heroku'
+alias hp='git push heroku `git rev-parse --abbrev-ref HEAD`:master'
+alias hm='heroku run python manage.py migrate' # Migrate the remote apps Django database
+alias hs='heroku run python manage.py shell'
+
+# Git Shortcuts
+alias bb='git checkout -' # Checkout previous branch
+alias bv='git branch --color=always | nl'
+alias d='git difftool'
+alias dd='dumpdiff'
+alias dc='dumpcommit'
+alias ddd='git diff HEAD --color=always | cat'
+alias dm='git difftool master'
+# alias s='git status --short'   # Replaced by scripts/git/s
+alias ss='git status'
+alias back='git reset --hard HEAD^'
+alias br='git branch -r'
+alias l='gitlog -10'
+alias l2='gitlog -20'
+alias l3='gitlog -30' 
+alias l4='gitlog -40'
+alias ldate='gitlogdate -10'
+alias l2date='gitlogdate -20'
+alias l3date='gitlogdate -30'
+alias l4date='gitlogdate -40'
+alias lx='gitlog'
+alias lxdate='gitlogdate'
+alias gf='git fetch'
+alias r='git pull --rebase'
+alias p='git push -u origin `git rev-parse --abbrev-ref HEAD`'
+alias pn='git push --no-verify -u origin `git rev-parse --abbrev-ref HEAD`'
+alias pf='git push --force -u origin `git rev-parse --abbrev-ref HEAD`'
+alias pt='git push --tags'
+alias u='git pull'
+alias drb='git push origin --delete'
+alias ch='git checkout'
+alias chm='git checkout master'
+alias chd='git checkout develop'
+alias has='git branch --contains'
+alias branch='git rev-parse --abbrev-ref HEAD'
+alias commit='git rev-parse --verify HEAD'
+alias root='cd $(git rev-parse --show-toplevel)'
+alias reset='git add -A;git reset --hard HEAD;git clean -f'
+alias tool1='git config --global diff.tool Kaleidoscope'
+alias tool2='git config --global diff.tool p4mergetool'
+alias merge='git mergetool'
+alias c='git add -A;git commit -m'
+alias am='git add -A;git commit --amend --author "Zack M Fleischman <ZackMFleischman@gmail.com>" --no-edit' # Ammend last commit with my personal email as author
+alias sl='git log --pretty=format:"%Cred%h%Creset - %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset %C(cyan)- %C(reset)%s %C(yellow)%d%Creset" --abbrev-commit --date=relative --color=always | grep --color=always -i' # Search git log
+alias mm='(current_branch=`git rev-parse --abbrev-ref HEAD`; git checkout master; git pull; git checkout $current_branch; git merge master)' # Merge current branch with master
+alias md='(current_branch=`git rev-parse --abbrev-ref HEAD`; git checkout develop; git pull; git checkout $current_branch; git merge develop)' # Merge current branch with develop
+alias ben='git log --author=Ben --all --pretty=format:"%Cred%h%Creset - %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset %C(cyan)- %C(reset)%s %C(yellow)%d%Creset" --abbrev-commit --date=relative --color=always | nl | less'
+alias goran='git log --author=Goran --all --pretty=format:"%Cred%h%Creset - %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset %C(cyan)- %C(reset)%s %C(yellow)%d%Creset" --abbrev-commit --date=relative --color=always | nl | less'
+alias stash='git add -A;git stash'
+
+# Misc
+alias ll='ls -la'
+alias pp="jq '.'"
+alias x='chmod 755' # Grant executable permissions
+alias myip="ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1" # Current IP Address
+alias resume='pdflatex ~/repos/resume/src/resume.tex;mv ~/repos/resume/src/resume.pdf ~/repos/resume/resume.pdf;open ~/repos/resume/resume.pdf' # Build my resumé
+alias tj='vim -t' # Vim Tag Jump
+alias bike='python ~/repos/BikeCommuter/BikeCommute.py' # Bike Commute app
+alias tags='f;ctags -R .' # Generate tags for a git project
+alias tagsjs='f;generateJSTags'
+alias g='growl'
+alias ip="ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'"
+alias showtime='while sleep 1;do tput sc;tput cup 0 $(($(tput cols)-29));date;tput rc;done &'
+alias stoptime='ps aux | grep \[s\]leep | awkc 2 | xargs kill'
+alias js='node ~/repl.js'
+alias hi='history'
+alias enhance='python3 ~/repos/neural-enhance/enhance.py'
+alias add='awk "{s+=\$1} END {print s}"'
+alias d1='python -c "import random; print(random.randint(1,6));"'
+alias d2='python -c "import random; print(random.randint(2,12));"'
+alias d3='python -c "import random; print(random.randint(3,18));"'
+alias ripaudio='youtube-dl --extract-audio --audio-quality 0 --audio-format m4a'
+alias paths='for f in $(ls); echo $(pwd)/$f'
+alias dev='npm run dev'
+alias ming='email -t 8483914275@tmomail.net'
+alias i='internet'
+
+# Raspberry Pi Stuff
+alias raspberryIP='arp -a | grep raspberry | awkc 2 | tr -d "()"'
+#alias pi='ssh pi@$(raspberryIP)'
+
+alias ci='n "Check on CircleCI" 13&'
+
+#########################
+# SSH Into Server Aliases
+#########################
+#alias bro='ssh -i ~/.ssh/zack-bro-your-bros-ssh-keys.pem ubuntu@zack-dev.broyourbros.com'
+
+################
+# Path Shortcuts
+################
+
+# All Repos
+alias a='cd ~/repos'
+
+# Scripts
+alias q='cd ~/repos/scripts'
+
+# Config
+alias ac='cd ~/repos/config'
+
+
+###########
+# Functions
+###########
+
+# Extract from a zipped file
+extract () {
+    if [ -f $1 ] ; then
+        case $1 in
+            *.tar.bz2)   tar xvjf $1 && cd $(echo $1 | sed 's/.tar.bz2//')    ;;
+            *.tar.gz)    tar xvzf $1 && cd $(echo $1 | sed 's/.tar.gz//')    ;;
+            *.bz2)       bunzip2 $1 && cd $(echo $1 | sed 's/.bz2//')    ;;
+            *.rar)       unrar x $1 && cd $(echo $1 | sed 's/.rar//')    ;;
+            *.gz)        gunzip $1 && cd $(echo $1 | sed 's/.gz//')    ;;
+            *.tar)       tar xvf $1 && cd $(echo $1 | sed 's/.tar//')    ;;
+            *.tbz2)      tar xvjf $1 && cd $(echo $1 | sed 's/.tbz2//')    ;;
+            *.tgz)       tar xvzf $1 && cd $(echo $1 | sed 's/.tgz//')    ;;
+            *.zip)       unzip $1 && cd $(echo $1 | sed 's/.zip//')    ;;
+            *.Z)         uncompress $1 && cd $(echo $1 | sed 's/.Z//')    ;;
+            *.7z)        7z x $1 && cd $(echo $1 | sed 's/.7z//')    ;;
+            *)           echo "don't know how to extract '$1'..." ;;
+        esac
+    else
+        echo "'$1' is not a valid file!"
+    fi
+}
+
+# Ctrl-Z to switch between vim and the command line
+fancy-ctrl-z () {
+    if [[ $#BUFFER -eq 0 ]]; then
+        BUFFER="fg"
+        zle accept-line
+    else
+        zle push-input
+        zle clear-screen
+    fi
+}
+zle -N fancy-ctrl-z
+bindkey '^Z' fancy-ctrl-z
+
+# Calculator
+calc () {
+    bc -l <<< "$@"
+}
+
+### Load Git Completion
+#zstyle ':completion:*:*:git:*' script ~/.zsh/git-completion.bash
+#fpath=(~/.zsh $fpath)
+
+#autoload -Uz compinit && compinit
+
+#########################
+# Source External Scripts
+#########################
+source ~/repos/scripts/util/exportColors
+
+if [[ -s "~/.frontrc" ]]; then
+    source ~/.frontrc
+fi
+
+if [[ -s "~/repos/goto/goto.sh" ]]; then
+    source ~/repos/goto/goto.sh
+fi
+
+CREDS_FILE="$HOME/.creds"
+if [[ -f "$CREDS_FILE" ]]; then
+    source ~/.creds
+fi
