@@ -21,6 +21,11 @@ create_symlinks
 
 echo "Setting up oh-my-zsh..."
 ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
-git clone git://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-autosuggestions.git $ZSH_CUSTOM/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
 ln -s "$script_dir/burner.zsh-theme" "$ZSH_CUSTOM/themes/burner.zsh-theme"
+
+cd $HOME
+mkdir repos
+cd repos
+git clone https://github.com/ZackMFleischman/scripts.git
